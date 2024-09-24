@@ -1,4 +1,4 @@
-import { useRef, useEffect, useContext } from 'react'
+import { useRef, useContext } from 'react'
 
 
 
@@ -18,11 +18,11 @@ import { currencyFormatter } from '@/app/lib/utils';
 
 
 
-const AddIncomeModal = (show, onClose) => {
+const AddIncomeModal = ({show, onClose}) => {
 
     const amountRef = useRef()
     const descriptionRef = useRef()
-    const {income } = useContext(FinanceContext)
+    const {income, addIncomeItem,removeIncomeItem } = useContext(FinanceContext)
 
     // Handler Functions
     const addIncomeHandler = async (e) => {
@@ -35,14 +35,28 @@ const AddIncomeModal = (show, onClose) => {
 
         };
 
-        amountRef.current.value = ""
-        descriptionRef.current.value = ""
+        try {
+            
+            await addIncomeItem(newIncome)
+    
+            amountRef.current.value = ""
+            descriptionRef.current.value = ""
+        } catch (error) {
+            console.log(error.message);
+            
+        }
+
 
 
 
     }
     const deleteIncomeHandler = async (incomeId) => {
-
+        try {
+            await removeIncomeItem(incomeId)
+        } catch (error) {
+            console.log(error.message);
+            
+        }
 
     }
     

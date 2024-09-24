@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import {createContext , useState , useEffect} from 'react'
+import { createContext, useState, useEffect } from 'react'
 // firbase
 import { db } from "../../lib/fireBase"
 import {
@@ -14,15 +14,16 @@ import {
 
 export const FinanceContext = createContext({
     income: [],
-    addIncomeItem : async() => {},
-    removeIncomeItem : async () => {}
+    addIncomeItem: async () => { },
+    removeIncomeItem: async () => { }
 })
 
-const FinanceContextProvider = ({children}) =>{
-    const [income , setIncome] = useState()
+const FinanceContextProvider = ({ children }) => {
+    const [income, setIncome] = useState()
+    const [expense, setExpense] = useState()
 
-    const addIncomeItem =async (newIncome) => {
-        const collectionRef = collection(bd , "income")
+    const addIncomeItem = async (newIncome) => {
+        const collectionRef = collection(db, "income")
 
         try {
             const docSnap = await addDoc(collectionRef, newIncome)
@@ -37,15 +38,15 @@ const FinanceContextProvider = ({children}) =>{
                 ]
             })
 
-           
+
         } catch (error) {
             console.log(error.message);
             throw error
-            
+
 
         }
     }
-    const removeIncomeItem =async (incomeId) => {
+    const removeIncomeItem = async (incomeId) => {
         const docRef = doc(db, 'income', incomeId)
         try {
 
@@ -63,7 +64,7 @@ const FinanceContextProvider = ({children}) =>{
         }
     }
 
-    const values = {income , addIncomeItem , removeIncomeItem}
+    const values = { income, expense, addIncomeItem, removeIncomeItem }
     useEffect(() => {
         const getIncome = async () => {
             const collectionRef = collection(db, "income");
@@ -78,11 +79,24 @@ const FinanceContextProvider = ({children}) =>{
             })
             setIncome(data)
         }
+        const getExpenseData = async () => {
+            const collectionRef = collection(db, 'expenses');
+            const docSnap = await getDocs(collectionRef);
+
+            const data = docSnap.map((doc) => {
+                return {
+                    id: doc.id,
+                    ...doc.data(),
+                };
+            });
+            setExpense(data)
+        }
         getIncome()
+        getExpenseData()
     }, [])
 
-    return <FinanceContext.Provider 
-    value={values}>
+    return <FinanceContext.Provider
+        value={values}>
         {children}
     </FinanceContext.Provider>
 }
