@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 
 import { currencyFormatter } from './lib/utils'
@@ -11,7 +11,7 @@ import { Chart as chartjs, ArcElement, Tooltip, Legend } from "chart.js";
 
 import ExpenseCategoryItem from './components/ExpenseCategoryItem';
 import AddIncomeModal from './components/modals/AddIncomeModal';
-
+import { FinanceContext } from './lib/store/FinanceContext';
 
 
 
@@ -26,6 +26,8 @@ const DummyData = [
 
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(true)
+  
+  const {expenses}= useContext(FinanceContext)
 
 
 
@@ -70,7 +72,7 @@ export default function Home() {
         <section className='py-6'>
           <h3 className='text-2xl '>My Expense</h3>
           <div className='flex flex-col gap-4 mt-6'>
-            {DummyData.map((expense => {
+            {expenses.map((expense => {
               return (
                 <ExpenseCategoryItem
                   key={expense.id}
@@ -89,12 +91,12 @@ export default function Home() {
           <div className='w-1/2 mx-auto'>
             <Doughnut
               data={{
-                labels: DummyData.map((expense) => expense.title),
+                labels: expenses.map((expense) => expense.title),
                 datasets: [
                   {
                     labels: "Expenses",
-                    data: DummyData.map((expense) => expense.total),
-                    backgroundColor: DummyData.map((expense) => expense.color),
+                    data: expenses.map((expense) => expense.total),
+                    backgroundColor: expenses.map((expense) => expense.color),
                     borderColor: ['#18181b'],
                     borderWidth: 5,
                   }

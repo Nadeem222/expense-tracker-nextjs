@@ -14,13 +14,14 @@ import {
 
 export const FinanceContext = createContext({
     income: [],
+    expenses: [],
     addIncomeItem: async () => { },
     removeIncomeItem: async () => { }
 })
 
 const FinanceContextProvider = ({ children }) => {
     const [income, setIncome] = useState()
-    const [expense, setExpense] = useState()
+    const [expenses, setExpenses] = useState([])
 
     const addIncomeItem = async (newIncome) => {
         const collectionRef = collection(db, "income")
@@ -64,7 +65,8 @@ const FinanceContextProvider = ({ children }) => {
         }
     }
 
-    const values = { income, expense, addIncomeItem, removeIncomeItem }
+    const values = { income, expenses, addIncomeItem, removeIncomeItem }
+    
     useEffect(() => {
         const getIncome = async () => {
             const collectionRef = collection(db, "income");
@@ -82,14 +84,15 @@ const FinanceContextProvider = ({ children }) => {
         const getExpenseData = async () => {
             const collectionRef = collection(db, 'expenses');
             const docSnap = await getDocs(collectionRef);
-
-            const data = docSnap.map((doc) => {
+            console.log(docSnap);
+            
+            const data = docSnap.docs.map((doc) => {
                 return {
                     id: doc.id,
                     ...doc.data(),
                 };
             });
-            setExpense(data)
+            setExpenses(data)
         }
         getIncome()
         getExpenseData()
