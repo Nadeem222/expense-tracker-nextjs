@@ -1,5 +1,5 @@
 "use client"
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 
 import { currencyFormatter } from './lib/utils'
@@ -12,30 +12,35 @@ import { Chart as chartjs, ArcElement, Tooltip, Legend } from "chart.js";
 import ExpenseCategoryItem from './components/ExpenseCategoryItem';
 import AddIncomeModal from './components/modals/AddIncomeModal';
 import { FinanceContext } from './lib/store/FinanceContext';
+import AddExpenseModal from './components/modals/AddExpenseModal';
 
 
 
 
 chartjs.register(ArcElement, Tooltip, Legend);
-const DummyData = [
-  { id: 1, title: "Entertainment", color: '#000', total: 500 },
-  { id: 2, title: "Party", color: '#000', total: 1000 },
-  { id: 3, title: "Movies", color: '#000', total: 200 },
-  { id: 4, title: "Holiday", color: '#000', total: 800 },
-];
 
 export default function Home() {
-  const [modalOpen, setModalOpen] = useState(true)
-  
-  const {expenses}= useContext(FinanceContext)
+  const [showExpenseModal, setShowExpenseModal] = useState(false)
+  const [balance, setBalance] = useState(0)
+  const { expenses, income } = useContext(FinanceContext)
 
 
 
   const [showAddIncomeModal, setShowAddIncomeModal] = useState(false)
+  // console.log(income , expenses);
 
 
 
-
+  useEffect(() => {
+    const newBalance =
+      income.reduce((total, i) => {
+        return total + i.amount;
+      }, 0)
+    expenses.reduce((total, e) => {
+      return total + e.total
+    }, 0)
+    setBalance(newBalance)
+  }, [expenses, income])
 
   return (
     <>
@@ -43,17 +48,24 @@ export default function Home() {
 
       <AddIncomeModal show={showAddIncomeModal} onClose={setShowAddIncomeModal} />
 
+      {/* Add Expense Modal */}
+
+      <AddExpenseModal
+        show={showExpenseModal}
+        onClose={setShowExpenseModal}
+      />
+
       <main className="container max-w-2xl px-6 mx-auto">
 
         <section className="py-3">
           <small className="text-gray-400 text-md">My Balance</small>
-          <h2 className="text-4xl font-bold">{currencyFormatter(10000)}</h2>
+          <h2 className="text-4xl font-bold">{currencyFormatter(balance)}</h2>
         </section>
         <section className="flex items-center gap-2 py-3">
 
           <button
             onClick={() => {
-
+              setShowExpenseModal(true)
             }}
             className="btn btn-primary">
             + Expenses

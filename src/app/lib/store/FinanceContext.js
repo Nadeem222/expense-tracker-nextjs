@@ -20,7 +20,7 @@ export const FinanceContext = createContext({
 })
 
 const FinanceContextProvider = ({ children }) => {
-    const [income, setIncome] = useState()
+    const [income, setIncome] = useState([])
     const [expenses, setExpenses] = useState([])
 
     const addIncomeItem = async (newIncome) => {
