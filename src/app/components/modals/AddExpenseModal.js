@@ -7,9 +7,13 @@ import { v4 as uuidv4 } from 'uuid'
 const AddExpenseModal = ({ show, onClose }) => {
     const [expenseAmount, setExpenseAmount] = useState("");
     const [selectedCategory, setSelectedCategory] = useState(null)
-    const { expenses } = useContext(FinanceContext)
+    const { expenses, addExpenseItem } = useContext(FinanceContext)
+    const [showAddExpense, setShowAddExpense] = useState(false)
 
-    const addExpenseHandler = () => {
+    const titleRef = useRef()
+    const colorRef = useRef()
+
+    const addExpenseHandler = async () => {
 
         const expense = expenses.find((e) => {
             return e.id === selectedCategory
@@ -27,11 +31,18 @@ const AddExpenseModal = ({ show, onClose }) => {
                 },
             ]
         }
-        console.log(newExpense);
-        setExpenseAmount('');
-        setSelectedCategory(null);
-        onClose();
-        
+        try {
+
+            await addExpenseItem(selectedCategory, newExpense)
+            setExpenseAmount('');
+            setSelectedCategory(null);
+            onClose();
+        } catch (error) {
+            console.log(error.message);
+
+        }
+
+
     }
 
     return (
@@ -53,7 +64,39 @@ const AddExpenseModal = ({ show, onClose }) => {
             {expenseAmount > 0 && (
 
                 <div className='flex flex-col gap-4 mt-6'>
-                    <h3 className='text-2xl capitalize'>Select expense category</h3>
+                    <div className='flex items-center justify-between'>
+                        <h3 className='text-2xl capitalize'>Select expense category</h3>
+                        <button 
+                        className='text-lime-400'
+                        onClick={() =>{
+                            setShowAddExpense(true)
+                        }}>
+                            + New Category
+                        </button>
+                    </div>
+                    {showAddExpense && (
+
+                        <div className='flex gap-2 items-center justify-between'>
+                            <input
+                                type='text'
+                                placeholder='enter title'
+                                ref={titleRef}
+                            />
+                            <label>Pick Color</label>
+                            <input
+                                type='color'
+                                ref={colorRef}
+                                className='w-24 h-10'
+                            />
+                            <button className='btn btn-primary-outline'>Create</button>
+                            <button 
+                            onClick={()=>{
+                                setShowAddExpense(false)
+                            }}
+                            className='btn btn-danger'
+                            >Cancle</button>
+                        </div>
+                    )}
                     {expenses.map((expense) => {
                         return (
                             <button
