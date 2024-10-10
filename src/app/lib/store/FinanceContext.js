@@ -18,30 +18,79 @@ export const FinanceContext = createContext({
     expenses: [],
     addIncomeItem: async () => { },
     addExpenseItem: async () => { },
-    removeIncomeItem: async () => { }
+    removeIncomeItem: async () => { },
+    addCategory: async () => { },
+    removeExpenseItem: async () =>{},
 })
 
 const FinanceContextProvider = ({ children }) => {
     const [income, setIncome] = useState([])
     const [expenses, setExpenses] = useState([])
 
-    const addExpenseItem = async(expenseCategoryId , newExpense) =>{
-        const docRef = doc(db , "expenses" , expenseCategoryId);
+    const addCategory = async (category) => {
         try {
-            await updateDoc(docRef ,{...newExpense})
-            setExpenses(prevState=>{
+            const collectionRef = collection(db, 'expenses');
+
+            const docSnap = await addDoc(collectionRef, {
+                ...category,
+                items: [],
+            });
+            setExpenses((prevExpenses) => {
+                return [
+                    ...prevExpenses,
+                    {
+                        id: docSnap.id,
+                        items: [],
+                        ...category
+                    }
+                ]
+            })
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+    const addExpenseItem = async (expenseCategoryId, newExpense) => {
+        const docRef = doc(db, "expenses", expenseCategoryId);
+        try {
+            await updateDoc(docRef, {
+                items: [...newExpense.items],  // Update items array
+                total: newExpense.total,
+            })
+            setExpenses(prevState => {
                 const updatedExpenses = [...prevState]
 
-                const foundIndex = updatedExpenses.find((expense) => {
+                const foundIndex = updatedExpenses.findIndex((expense) => {
                     return expense.id === expenseCategoryId;
-                }) 
+                })
 
-                updatedExpenses[foundIndex] = {id: expenseCategoryId , ...newExpense}
+                updatedExpenses[foundIndex] = { id: expenseCategoryId, ...newExpense }
 
                 return updatedExpenses;
             })
         } catch (error) {
             throw error
+        }
+    }
+
+    const removeExpenseItem = async (updatedExpense , expenseCategoryId) =>{
+        try {
+            const docRef = doc(db , 'expenses' , expenseCategoryId);
+            await updateDoc(docRef , {
+                ...updatedExpense,
+            })
+
+            setExpenses(prevExpenses =>{
+                const updatedExpense = [...prevExpenses];
+                const pos = updatedExpense.findIndex((ex) => ex.id === expenseCategoryId)
+                updatedExpense[pos].items = [...updatedExpense.items];
+                updatedExpense[pos].total = updatedExpense.total;
+
+                return updatedExpense
+            })
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -87,8 +136,15 @@ const FinanceContextProvider = ({ children }) => {
         }
     }
 
-    const values = { income, expenses, addIncomeItem, removeIncomeItem , addExpenseItem }
-    
+    const values = { 
+        income, 
+        expenses, 
+        addIncomeItem, 
+        removeIncomeItem, 
+        addExpenseItem, 
+        removeExpenseItem , 
+        addCategory }
+
     useEffect(() => {
         const getIncome = async () => {
             const collectionRef = collection(db, "income");
@@ -107,7 +163,7 @@ const FinanceContextProvider = ({ children }) => {
             const collectionRef = collection(db, 'expenses');
             const docSnap = await getDocs(collectionRef);
             console.log(docSnap);
-            
+
             const data = docSnap.docs.map((doc) => {
                 return {
                     id: doc.id,

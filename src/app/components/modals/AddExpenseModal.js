@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 const AddExpenseModal = ({ show, onClose }) => {
     const [expenseAmount, setExpenseAmount] = useState("");
     const [selectedCategory, setSelectedCategory] = useState(null)
-    const { expenses, addExpenseItem } = useContext(FinanceContext)
+    const { expenses, addExpenseItem, addCategory } = useContext(FinanceContext)
     const [showAddExpense, setShowAddExpense] = useState(false)
 
     const titleRef = useRef()
@@ -44,6 +44,17 @@ const AddExpenseModal = ({ show, onClose }) => {
 
 
     }
+    const addCategoryHandler = async () => {
+        const title = titleRef.current.value;
+        const color = colorRef.current.value;
+
+        try {
+            await addCategory({ title, color, total: 0 })
+            setShowAddExpense(false)
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
 
     return (
         <Modal
@@ -66,11 +77,11 @@ const AddExpenseModal = ({ show, onClose }) => {
                 <div className='flex flex-col gap-4 mt-6'>
                     <div className='flex items-center justify-between'>
                         <h3 className='text-2xl capitalize'>Select expense category</h3>
-                        <button 
-                        className='text-lime-400'
-                        onClick={() =>{
-                            setShowAddExpense(true)
-                        }}>
+                        <button
+                            className='text-lime-400'
+                            onClick={() => {
+                                setShowAddExpense(true)
+                            }}>
                             + New Category
                         </button>
                     </div>
@@ -88,12 +99,16 @@ const AddExpenseModal = ({ show, onClose }) => {
                                 ref={colorRef}
                                 className='w-24 h-10'
                             />
-                            <button className='btn btn-primary-outline'>Create</button>
-                            <button 
-                            onClick={()=>{
-                                setShowAddExpense(false)
-                            }}
-                            className='btn btn-danger'
+                            <button className='btn btn-primary-outline'
+                                onClick={addCategoryHandler}
+                            >
+                                Create
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowAddExpense(false)
+                                }}
+                                className='btn btn-danger'
                             >Cancle</button>
                         </div>
                     )}

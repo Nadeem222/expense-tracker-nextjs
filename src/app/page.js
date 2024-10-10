@@ -88,9 +88,7 @@ export default function Home() {
               return (
                 <ExpenseCategoryItem
                   key={expense.id}
-                  color={expense.color}
-                  title={expense.title}
-                  total={expense.total}
+                  expense={expense}
                 />
               )
             }
