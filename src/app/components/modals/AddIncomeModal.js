@@ -11,6 +11,7 @@ import { FaRegTrashCan } from "react-icons/fa6";
 
 
 import { FinanceContext } from '@/app/lib/store/FinanceContext';
+import { authContext } from '@/app/lib/store/auth-context';
 import { currencyFormatter } from '@/app/lib/utils';
 
 
@@ -18,12 +19,12 @@ import { currencyFormatter } from '@/app/lib/utils';
 
 
 
-const AddIncomeModal = ({show, onClose}) => {
+const AddIncomeModal = ({ show, onClose }) => {
 
     const amountRef = useRef()
     const descriptionRef = useRef()
-    const {income, addIncomeItem,removeIncomeItem } = useContext(FinanceContext)
-
+    const { income, addIncomeItem, removeIncomeItem } = useContext(FinanceContext)
+    const { user } = useContext(authContext)
     // Handler Functions
     const addIncomeHandler = async (e) => {
         e.preventDefault();
@@ -31,19 +32,20 @@ const AddIncomeModal = ({show, onClose}) => {
         const newIncome = {
             amount: parseFloat(amountRef.current.value),
             description: descriptionRef.current.value,
-            createdAt: new Date()
+            createdAt: new Date(),
+            uid: user.uid
 
         };
 
         try {
-            
+
             await addIncomeItem(newIncome)
-    
+
             amountRef.current.value = ""
             descriptionRef.current.value = ""
         } catch (error) {
             console.log(error.message);
-            
+
         }
 
 
@@ -55,12 +57,12 @@ const AddIncomeModal = ({show, onClose}) => {
             await removeIncomeItem(incomeId)
         } catch (error) {
             console.log(error.message);
-            
+
         }
 
     }
-    
-    
+
+
     return (
         <Modal
             show={show}

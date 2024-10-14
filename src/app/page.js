@@ -12,7 +12,9 @@ import { Chart as chartjs, ArcElement, Tooltip, Legend } from "chart.js";
 import ExpenseCategoryItem from './components/ExpenseCategoryItem';
 import AddIncomeModal from './components/modals/AddIncomeModal';
 import { FinanceContext } from './lib/store/FinanceContext';
+import { authContext } from './lib/store/auth-context';
 import AddExpenseModal from './components/modals/AddExpenseModal';
+import Signin from './components/Signin';
 
 
 
@@ -23,6 +25,7 @@ export default function Home() {
   const [showExpenseModal, setShowExpenseModal] = useState(false)
   const [balance, setBalance] = useState(0)
   const { expenses, income } = useContext(FinanceContext)
+  const {user} = useContext(authContext)
 
 
 
@@ -41,7 +44,9 @@ export default function Home() {
     }, 0)
     setBalance(newBalance)
   }, [expenses, income])
-
+if(!user){
+  return <Signin />
+}
   return (
     <>
       {/* AddIncome  Modal */}

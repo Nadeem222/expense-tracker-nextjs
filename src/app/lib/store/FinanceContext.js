@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect, useContext } from 'react'
 // firbase
 import { db } from "../../lib/fireBase"
 import {
@@ -10,8 +10,11 @@ import {
     getDocs,
     deleteDoc,
     doc,
-    updateDoc
+    updateDoc,
+    query,
+    where
 } from 'firebase/firestore'
+import { authContext } from './auth-context'
 
 export const FinanceContext = createContext({
     income: [],
@@ -21,18 +24,21 @@ export const FinanceContext = createContext({
     removeIncomeItem: async () => { },
     addCategory: async () => { },
     removeExpenseItem: async () => { },
-    removeExpenseCategory: async () =>{}
+    removeExpenseCategory: async () => { }
 })
 
 const FinanceContextProvider = ({ children }) => {
     const [income, setIncome] = useState([])
     const [expenses, setExpenses] = useState([])
 
+    const { user } = useContext(authContext)
+
     const addCategory = async (category) => {
         try {
             const collectionRef = collection(db, 'expenses');
 
             const docSnap = await addDoc(collectionRef, {
+                uid: user.uid,
                 ...category,
                 items: [],
             });
@@ -41,6 +47,7 @@ const FinanceContextProvider = ({ children }) => {
                     ...prevExpenses,
                     {
                         id: docSnap.id,
+                        uid: user.uid,
                         items: [],
                         ...category
                     }
@@ -95,13 +102,13 @@ const FinanceContextProvider = ({ children }) => {
         }
     }
 
-    const removeExpenseCategory = async (expenseCategoryId) =>{
+    const removeExpenseCategory = async (expenseCategoryId) => {
         try {
-            const docRef = doc(db , 'expenses' , expenseCategoryId)
+            const docRef = doc(db, 'expenses', expenseCategoryId)
             await deleteDoc(docRef)
 
             setExpenses(prevExpenses => {
-                const updatedExpenses = prevExpenses.filter((expense) => expense.id  !== expenseCategoryId)
+                const updatedExpenses = prevExpenses.filter((expense) => expense.id !== expenseCategoryId)
 
                 return [...updatedExpenses]
             })
@@ -164,9 +171,11 @@ const FinanceContextProvider = ({ children }) => {
     }
 
     useEffect(() => {
+        if(!user) return;
         const getIncome = async () => {
             const collectionRef = collection(db, "income");
-            const docsSnap = await getDocs(collectionRef)
+            const q = query(collectionRef , where('uid' , "==" , user.uid))
+            const docsSnap = await getDocs(q)
 
             const data = docsSnap.docs.map((doc) => {
                 return {
@@ -179,7 +188,8 @@ const FinanceContextProvider = ({ children }) => {
         }
         const getExpenseData = async () => {
             const collectionRef = collection(db, 'expenses');
-            const docSnap = await getDocs(collectionRef);
+            const q = query(collectionRef , where("uid", "==" , user.uid))
+            const docSnap = await getDocs(q);
             console.log(docSnap);
 
             const data = docSnap.docs.map((doc) => {
