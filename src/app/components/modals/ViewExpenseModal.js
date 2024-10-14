@@ -6,19 +6,34 @@ import { FinanceContext } from '@/app/lib/store/FinanceContext';
 
 
 const ViewExpenseModal = ({ show, onClose, expense }) => {
-  // console.log(expense);
+  console.log("Expenses",expense);
 
-  const { removeExpenseItem } = useContext(FinanceContext)
+  const { removeExpenseItem , removeExpenseCategory } = useContext(FinanceContext)
  const deleteExpenseItemHandler = async (item) =>{
+  console.log("Items" ,item);
+  
   try {
-    const updatedItems = expense.items.filter((i) = i.id !== item.id)
+
+    // remove the item from list
+    const updatedItems = expense.items.filter((i) => i.id !== item.id)
      
+
+    // update the expense Balance
     const updatedExpense = {
       items: [...updatedItems],
       total : expense.total - item.amount,
     };
 
     await removeExpenseItem(updatedExpense , expense.id)
+  } catch (error) {
+    console.log(error.message);
+    
+  }
+ }
+
+ const deleteExpenseCategoryHandler = async () =>{
+  try {
+    await removeExpenseCategory(expense.id)
   } catch (error) {
     console.log(error.message);
     
@@ -31,7 +46,10 @@ const ViewExpenseModal = ({ show, onClose, expense }) => {
         onClose={onClose}>
         <div className="flex items-center justify-between" >
           <h2 className='text-4xl'>{expense.title}</h2>
-          <button className="btn btn-danger">Delete</button>
+          <button 
+          className="btn btn-danger"
+          onClick={deleteExpenseCategoryHandler}
+          >Delete</button>
         </div>
         <div>
           <h3 className='my-4 text-2xl'>Expense History</h3>

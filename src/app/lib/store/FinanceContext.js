@@ -20,7 +20,8 @@ export const FinanceContext = createContext({
     addExpenseItem: async () => { },
     removeIncomeItem: async () => { },
     addCategory: async () => { },
-    removeExpenseItem: async () =>{},
+    removeExpenseItem: async () => { },
+    removeExpenseCategory: async () =>{}
 })
 
 const FinanceContextProvider = ({ children }) => {
@@ -74,23 +75,38 @@ const FinanceContextProvider = ({ children }) => {
         }
     }
 
-    const removeExpenseItem = async (updatedExpense , expenseCategoryId) =>{
+    const removeExpenseItem = async (updatedExpense, expenseCategoryId) => {
         try {
-            const docRef = doc(db , 'expenses' , expenseCategoryId);
-            await updateDoc(docRef , {
+            const docRef = doc(db, 'expenses', expenseCategoryId);
+            await updateDoc(docRef, {
                 ...updatedExpense,
             })
 
-            setExpenses(prevExpenses =>{
-                const updatedExpense = [...prevExpenses];
-                const pos = updatedExpense.findIndex((ex) => ex.id === expenseCategoryId)
-                updatedExpense[pos].items = [...updatedExpense.items];
-                updatedExpense[pos].total = updatedExpense.total;
+            setExpenses(prevExpenses => {
+                const updatedExpenses = [...prevExpenses];
+                const pos = updatedExpenses.findIndex((ex) => ex.id === expenseCategoryId)
+                updatedExpenses[pos].items = [...updatedExpense.items];
+                updatedExpenses[pos].total = updatedExpense.total;
 
-                return updatedExpense
+                return updatedExpenses
             })
         } catch (error) {
             throw error;
+        }
+    }
+
+    const removeExpenseCategory = async (expenseCategoryId) =>{
+        try {
+            const docRef = doc(db , 'expenses' , expenseCategoryId)
+            await deleteDoc(docRef)
+
+            setExpenses(prevExpenses => {
+                const updatedExpenses = prevExpenses.filter((expense) => expense.id  !== expenseCategoryId)
+
+                return [...updatedExpenses]
+            })
+        } catch (error) {
+            throw error
         }
     }
 
@@ -136,14 +152,16 @@ const FinanceContextProvider = ({ children }) => {
         }
     }
 
-    const values = { 
-        income, 
-        expenses, 
-        addIncomeItem, 
-        removeIncomeItem, 
-        addExpenseItem, 
-        removeExpenseItem , 
-        addCategory }
+    const values = {
+        income,
+        expenses,
+        addIncomeItem,
+        removeIncomeItem,
+        addExpenseItem,
+        removeExpenseItem,
+        addCategory,
+        removeExpenseCategory
+    }
 
     useEffect(() => {
         const getIncome = async () => {

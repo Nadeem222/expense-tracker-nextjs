@@ -4,7 +4,7 @@ import ViewExpenseModal from './modals/ViewExpenseModal'
 
 
 const ExpenseCategoryItem = ({ expense }) => {
-    console.log("Color:" , expense.total);
+    // console.log("Color:" , expense.total);
     const [showViewExpenseModal, setShowViewExpenseModal] = useState(false)
 
     return (
